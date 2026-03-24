@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alternative Investments — Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:    #1A2744;
+    --navy-mid:#243257;
+    --gold:    #C9A84C;
+    --gold-lt: #F0DFA0;
+    --ice:     #E8EEF8;
+    --white:   #FFFFFF;
+    --slate:   #4A5568;
+    --smoke:   #718096;
+    --correct: #276749;
+    --wrong:   #9B2226;
+    --teal:    #2B7A78;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'Source Sans 3', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Background texture ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 20%, rgba(201,168,76,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 90% 80%, rgba(43,122,120,0.07) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative; z-index: 1;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  .header .eyebrow {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.75rem;
+  }
+  .header h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+  }
+  .header h1 span { color: var(--gold); }
+  .header p {
+    font-size: 0.95rem;
+    color: var(--smoke);
+    margin-top: 0.75rem;
+  }
+  .gold-bar {
+    width: 3rem; height: 3px;
+    background: var(--gold);
+    margin: 1.25rem auto 0;
+    border-radius: 2px;
+  }
+
+  /* ── Progress ── */
+  .progress-wrap {
+    margin-bottom: 2rem;
+  }
+  .progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.8rem; color: var(--smoke);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.05em;
+  }
+  .progress-track {
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), #e8c86a);
+    border-radius: 4px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ── Quiz card ── */
+  .card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 16px;
+    padding: 2.5rem 2.5rem 2rem;
+    position: relative;
+    backdrop-filter: blur(4px);
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .card.fade-out { opacity: 0; transform: translateY(12px); }
+  .card.fade-in  { animation: fadeUp 0.4s ease forwards; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+  .q-category {
+    display: inline-block;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--smoke);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+    margin-bottom: 1.25rem;
+  }
+  .q-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+  }
+  .q-hint {
+    font-size: 0.85rem;
+    color: var(--smoke);
+    margin-bottom: 1.75rem;
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  /* ── Options ── */
+  .options { display: flex; flex-direction: column; gap: 0.65rem; }
+
+  .opt {
+    display: flex; align-items: flex-start; gap: 1rem;
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 0.95rem 1.25rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: var(--ice);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .opt:hover:not(.disabled) {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.08);
+    transform: translateX(3px);
+  }
+  .opt.selected {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.12);
+  }
+  .opt.correct {
+    border-color: var(--correct);
+    background: rgba(39,103,73,0.18);
+    color: #9ae6b4;
+  }
+  .opt.wrong {
+    border-color: var(--wrong);
+    background: rgba(155,34,38,0.18);
+    color: #feb2b2;
+  }
+  .opt.disabled { cursor: default; pointer-events: none; }
+
+  .opt-label {
+    min-width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: background 0.2s;
+  }
+  .opt.correct .opt-label { background: var(--correct); color: white; }
+  .opt.wrong   .opt-label { background: var(--wrong);   color: white; }
+  .opt.selected .opt-label { background: var(--gold); color: var(--navy); }
+
+  /* ── Explanation ── */
+  .explanation {
+    margin-top: 1.5rem;
+    padding: 1.1rem 1.25rem;
+    background: rgba(255,255,255,0.04);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: var(--ice);
+    display: none;
+  }
+  .explanation.show { display: block; animation: fadeUp 0.3s ease; }
+  .explanation strong { color: var(--gold); }
+
+  /* ── Buttons ── */
+  .btn-row {
+    display: flex; justify-content: flex-end; gap: 0.75rem;
+    margin-top: 1.75rem;
+  }
+  .btn {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.7rem 1.8rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  }
+  .btn-primary {
+    background: var(--gold);
+    color: var(--navy);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(201,168,76,0.35); }
+  .btn-primary:disabled { opacity: 0.35; cursor: default; transform: none; box-shadow: none; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--smoke);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  .btn-ghost:hover { color: var(--white); border-color: rgba(255,255,255,0.3); }
+
+  /* ── Score screen ── */
+  .score-screen {
+    text-align: center;
+    padding: 3rem 1rem 2rem;
+    animation: fadeUp 0.5s ease;
+  }
+  .score-ring {
+    width: 130px; height: 130px;
+    border-radius: 50%;
+    border: 4px solid rgba(255,255,255,0.08);
+    margin: 0 auto 1.5rem;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    background: conic-gradient(var(--gold) var(--pct), rgba(255,255,255,0.06) 0%);
+  }
+  .score-ring-inner {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: var(--navy);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .score-big {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .score-denom {
+    font-size: 0.75rem;
+    color: var(--smoke);
+    letter-spacing: 0.05em;
+  }
+  .score-screen h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem;
+    margin-bottom: 0.5rem;
+  }
+  .score-screen p { color: var(--smoke); font-size: 0.95rem; max-width: 480px; margin: 0 auto 2rem; }
+
+  .grade-badge {
+    display: inline-block;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.35rem 1.2rem;
+    border-radius: 20px;
+    margin-bottom: 1.25rem;
+  }
+  .grade-distinction { background: rgba(201,168,76,0.18); color: var(--gold); border: 1px solid var(--gold); }
+  .grade-merit       { background: rgba(43,122,120,0.2);  color: #81e6d9;    border: 1px solid var(--teal); }
+  .grade-pass        { background: rgba(255,255,255,0.06); color: var(--smoke); border: 1px solid rgba(255,255,255,0.15); }
+  .grade-fail        { background: rgba(155,34,38,0.15);  color: #feb2b2;    border: 1px solid var(--wrong); }
+
+  .review-btn {
+    margin-top: 1rem;
+  }
+
+  /* ── Review panel ── */
+  .review-list { margin-top: 2rem; display: flex; flex-direction: column; gap: 1rem; }
+  .review-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 1.1rem 1.25rem;
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+  .review-item.r-correct { border-left: 3px solid var(--correct); }
+  .review-item.r-wrong   { border-left: 3px solid var(--wrong); }
+  .review-qtext { font-family: 'Playfair Display', serif; font-size: 0.95rem; margin-bottom: 0.45rem; color: var(--ice); }
+  .review-ans { color: var(--smoke); }
+  .review-ans .correct-ans { color: #9ae6b4; }
+  .review-ans .your-ans    { color: #feb2b2; }
+  .review-exp { margin-top: 0.5rem; color: var(--smoke); font-style: italic; font-size: 0.83rem; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .card { padding: 1.75rem 1.25rem 1.5rem; }
+    .q-text { font-size: 1.1rem; }
+    .wrap { padding: 2rem 1rem 4rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="header">
+    <div class="eyebrow">FIN7E9 — Wealth Management</div>
+    <h1>Alternative <span>Investments</span></h1>
+    <p>11 questions</p>
+    <div class="gold-bar"></div>
+  </header>
+
+  <div id="quiz-area">
+    <!-- Progress bar -->
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-label">
+        <span id="q-counter">Question 1 of 12</span>
+        <span id="score-live">Score: 0</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Card -->
+    <div class="card" id="card">
+      <div class="q-number" id="q-number">Question 01</div>
+      <div class="q-category" id="q-category"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="q-hint" id="q-hint"></div>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-submit" disabled onclick="submitAnswer()">Confirm</button>
+        <button class="btn btn-primary" id="btn-next" style="display:none" onclick="nextQuestion()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Score screen (hidden initially) -->
+  <div id="score-screen" class="card score-screen" style="display:none">
+    <div class="score-ring" id="score-ring">
+      <div class="score-ring-inner">
+        <div class="score-big" id="score-num">0</div>
+        <div class="score-denom">/ 11</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="restartQuiz()">Retake Quiz</button>
+    <button class="btn btn-ghost review-btn" onclick="toggleReview()">Review Answers</button>
+    <div class="review-list" id="review-list" style="display:none"></div>
+  </div>
+
+</div>
+
+<script>
+const questions = [
+  // Q1 — answer: C (index 2)
+  {
+    category: "Hedge Fund Fees",
+    text: "A hedge fund charges a 2% management fee and 20% performance fee with a high water mark. The fund's NAV was $100M at the start of Year 1. It fell to $85M at end of Year 1, then rose to $105M at end of Year 2. What performance fee is payable at end of Year 2?",
+    hint: "The high water mark means performance fees are only earned on gains above the previous peak NAV.",
+    options: [
+      "20% × ($105M − $85M) = $4.0M",
+      "No performance fee — the fund has not yet recovered its losses",
+      "20% × ($105M − $100M) = $1.0M",
+      "20% × $105M = $21.0M"
+    ],
+    answer: 2,
+    explanation: "<strong>Correct: $1.0M.</strong> The high water mark is $100M (the prior peak NAV). Performance fees are only payable on gains <em>above</em> that mark. The fund rose from $85M to $105M, but only $5M of that exceeds the HWM. 20% × $5M = <strong>$1.0M</strong>."
+  },
+  // Q2 — answer: C (index 2)
+  {
+    category: "Private Equity",
+    text: "An investor commits $10M to a buyout fund with a 1.5% annual management fee charged on committed capital. During the investment period (years 1–5), the GP calls $2M per year. What is the total management fee paid over the first 3 years?",
+    hint: "Management fees are charged on committed — not invested — capital.",
+    options: [
+      "$90,000 (1.5% × $2M × 3 years)",
+      "$270,000 (1.5% × $6M drawn after 3 years)",
+      "$450,000 (1.5% × $10M × 3 years)",
+      "$300,000 (1.5% × $10M × 2 years)"
+    ],
+    answer: 2,
+    explanation: "<strong>Correct: $450,000.</strong> The fee base is <em>committed</em> capital ($10M), regardless of how much has actually been drawn. 1.5% × $10M = $150,000/year. Over 3 years: <strong>$150,000 × 3 = $450,000</strong>."
+  },
+  // Q3 — answer: D (index 3)
+  {
+    category: "Private Equity J-Curve",
+    text: "Which of the following best explains why private equity returns are negative in the early years of a fund, producing the 'J-Curve' effect?",
+    options: [
+      "Early portfolio companies immediately lose value due to leverage",
+      "Limited Partners withdraw capital in the early years, reducing the investment base",
+      "The IRR calculation mechanically penalises early cash flows regardless of actual returns",
+      "Management fees are charged on committed capital while investments are still being sourced, and early write-downs occur before exits generate distributions"
+    ],
+    answer: 3,
+    explanation: "<strong>Correct.</strong> The J-Curve arises because: (1) management fees are paid on <em>committed</em> capital before it is fully deployed, (2) some early investments may be written down, and (3) no distributions have yet been made. Returns only turn positive (years 5–10) as assets are sold at a profit."
+  },
+  // Q4 — answer: A (index 0)
+  {
+    category: "Hedge Fund Structure",
+    text: "Under the Investment Company Act of 1940, a hedge fund seeking exemption must ensure its investors meet the 'qualified purchaser' threshold. What are the applicable minimum net worth requirements?",
+    options: [
+      "$5M for individuals; $25M for institutions",
+      "$1M for individuals; $5M for institutions",
+      "$2M for individuals; $10M for institutions",
+      "$10M for all investors regardless of type"
+    ],
+    answer: 0,
+    explanation: "<strong>Correct: $5M / $25M.</strong> To qualify for exemption from the Investment Company Act of 1940, individual investors must have a net worth exceeding <strong>$5 million</strong>, and institutional investors must exceed <strong>$25 million</strong>. This restricts hedge fund access to sophisticated, high-net-worth participants."
+  },
+  // Q5 — answer: B (index 1)
+  {
+    category: "Return Characteristics",
+    text: "An investor holds a traditional equity portfolio. They are considering adding an alternative asset with a Sharpe ratio of 0.4 — slightly below that of their existing portfolio. Under what condition would adding this asset still improve overall portfolio efficiency?",
+    options: [
+      "Only if the alternative asset has a higher expected absolute return",
+      "If the alternative asset has a low or negative correlation with the existing portfolio",
+      "It would never improve portfolio efficiency if the Sharpe ratio is lower",
+      "Only if the alternative asset reduces portfolio duration"
+    ],
+    answer: 1,
+    explanation: "<strong>Correct.</strong> Portfolio efficiency is not solely determined by an individual asset's Sharpe ratio. If the alternative has a <em>low or negative correlation</em> with the existing portfolio, it provides diversification benefits that reduce overall volatility — potentially improving the portfolio Sharpe ratio even if the asset's own ratio is lower."
+  },
+  // Q6 — answer: D (index 3)
+  {
+    category: "Real Assets",
+    text: "An investor seeking inflation protection is evaluating four assets: (A) Treasury Inflation-Protected Securities (TIPS), (B) Growth equities, (C) Commodity futures, (D) Nominal corporate bonds. Which combination offers the most direct inflation hedge?",
+    options: [
+      "B and D — equities and bonds tend to outperform in all environments",
+      "B and C — equities and commodities both rise during expansions",
+      "A and D — government-backed securities offer the safest hedge",
+      "A and C — TIPS are CPI-linked and commodities are coincident with inflation"
+    ],
+    answer: 3,
+    explanation: "<strong>Correct: A and C.</strong> TIPS are explicitly indexed to CPI — their principal adjusts with inflation. Commodity prices tend to rise with inflation as they are the raw inputs driving it. Growth equities and nominal bonds typically lag inflation or lose real value during inflationary periods."
+  },
+  // Q7 — answer: A (index 0)
+  {
+    category: "Private Equity Carried Interest",
+    text: "A PE fund raises $100M. It returns $165M to investors. The fund has a 20% carried interest with an 8% preferred return (hurdle). Assuming the preferred return is met, what is the GP's carried interest payment?",
+    hint: "Carried interest is 20% of profits above the hurdle. First calculate total profit, then apply carry.",
+    options: [
+      "$13M (20% of $65M profit)",
+      "$33M (20% of $165M total proceeds)",
+      "$16.5M (10% of total proceeds)",
+      "$10M (flat fee on $100M committed)"
+    ],
+    answer: 0,
+    explanation: "<strong>Correct: $13M.</strong> Total profit = $165M − $100M = <strong>$65M</strong>. Once the 8% hurdle is confirmed met, the GP receives carried interest of 20% on total profits: 20% × $65M = <strong>$13M</strong>. The remaining $52M of profit is distributed to the LPs."
+  },
+  // Q8 — answer: C (index 2)
+  {
+    category: "Merger Arbitrage",
+    text: "Company A announces it will acquire Company B at $50 per share. Company B's stock immediately trades at $47. What does the $3 spread most likely represent?",
+    options: [
+      "Arbitrageurs' guaranteed profit locked in at the announcement",
+      "The acquirer's control premium above Company B's intrinsic value",
+      "The market's compensation for the risk that the deal fails to complete",
+      "The regulatory approval fee required by antitrust authorities"
+    ],
+    answer: 2,
+    explanation: "<strong>Correct.</strong> In merger arbitrage, the target stock typically trades at a <em>discount</em> to the announced offer price. The spread ($3 here) compensates arbitrageurs for the risk of deal failure — regulatory rejection, financing collapse, or target board withdrawal. A wider spread implies higher perceived deal-failure risk."
+  },
+  // Q9 — answer: B (index 1)
+  {
+    category: "Commodities",
+    text: "According to the business cycle framework for asset class behaviour, at which phase would an investor typically expect commodity prices to be rising while equities are also rising but bond prices are falling?",
+    options: [
+      "Early recovery (GDP trough) — all risk assets begin to recover simultaneously",
+      "Mid-to-late expansion — GDP growth lifts commodity demand while rate rises pressure bonds",
+      "Recession / contraction — safe-haven flows push both bonds and commodities higher",
+      "Post-peak, early contraction — commodities lag the equity selloff by one quarter"
+    ],
+    answer: 1,
+    explanation: "<strong>Correct: Mid-to-late expansion.</strong> In the expansion phase, GDP growth drives demand for raw materials, pushing commodity prices higher. Equities continue rising on strong earnings, but bond prices fall as interest rates rise in response to growth and inflation. This is the phase of simultaneous equity and commodity appreciation with bond weakness."
+  },
+  // Q10 — answer: A (index 0)
+  {
+    category: "Private Equity",
+    text: "Which of the following best distinguishes mezzanine financing from both senior debt and equity in a leveraged buyout capital structure?",
+    options: [
+      "It is subordinated to senior debt but senior to equity, combining current income with capital appreciation potential via equity kickers",
+      "It ranks pari passu with senior debt but carries a higher interest rate to reflect credit risk",
+      "It sits above all debt in the capital structure and absorbs first losses in default",
+      "It is pure equity with a fixed dividend that converts to debt upon an IPO"
+    ],
+    answer: 0,
+    explanation: "<strong>Correct.</strong> Mezzanine occupies the <em>middle layer</em>: subordinated to senior secured debt but senior to equity. In return for elevated risk versus senior debt, mezzanine investors receive higher yields — typically current interest income plus equity kickers (warrants or PIK) offering capital appreciation upside."
+  },
+  // Q11 — answer: B (index 1)
+  {
+    category: "Alternative Manager Selection",
+    text: "During hedge fund due diligence, an allocator discovers the fund manager's stated 5-year audited returns were achieved when the strategy had only $30M AUM, but the fund now manages $2.5B in the same strategy. Which risk is the allocator MOST concerned about?",
+    options: [
+      "Style drift — the manager has changed their investment philosophy over time",
+      "Capacity constraints — the strategy may be unable to generate the same alpha at scale due to market impact and reduced flexibility",
+      "Key man risk — the founding manager may have departed since the track record was built",
+      "Operational risk — the back-office infrastructure may not have scaled with AUM"
+    ],
+    answer: 1,
+    explanation: "<strong>Correct: Capacity constraints.</strong> Many alternative strategies — particularly those exploiting small market inefficiencies, illiquid securities, or niche event-driven opportunities — have a finite capacity. A strategy generating strong alpha at $30M may struggle at $2.5B because position sizes create market impact, the opportunity set is too small, and entry/exit prices are compromised."
+  }
+];
+
+let current = 0;
+let selected = null;
+let submitted = false;
+let score = 0;
+let answers = [];
+
+function renderQuestion() {
+  const q = questions[current];
+  selected = null;
+  submitted = false;
+
+  const card = document.getElementById('card');
+  card.classList.remove('fade-in');
+  void card.offsetWidth;
+  card.classList.add('fade-in');
+
+  document.getElementById('q-number').textContent = `Question ${String(current + 1).padStart(2,'0')}`;
+  document.getElementById('q-category').textContent = q.category;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('q-hint').textContent = q.hint || '';
+  document.getElementById('q-hint').style.display = q.hint ? 'block' : 'none';
+
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  const labels = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'opt';
+    div.innerHTML = `<span class="opt-label">${labels[i]}</span><span>${opt}</span>`;
+    div.addEventListener('click', () => selectOption(i));
+    opts.appendChild(div);
+  });
+
+  document.getElementById('explanation').classList.remove('show');
+  document.getElementById('explanation').style.display = 'none';
+
+  const btnSubmit = document.getElementById('btn-submit');
+  const btnNext   = document.getElementById('btn-next');
+  btnSubmit.disabled = true;
+  btnSubmit.style.display = 'inline-flex';
+  btnNext.style.display   = 'none';
+  btnNext.textContent = current < questions.length - 1 ? 'Next →' : 'See Results';
+
+  // Progress
+  const pct = (current / questions.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('q-counter').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('score-live').textContent = `Score: ${score}`;
+}
+
+function selectOption(idx) {
+  if (submitted) return;
+  selected = idx;
+  document.querySelectorAll('.opt').forEach((el, i) => {
+    el.classList.toggle('selected', i === idx);
+  });
+  document.getElementById('btn-submit').disabled = false;
+}
+
+function submitAnswer() {
+  if (selected === null || submitted) return;
+  submitted = true;
+
+  const q = questions[current];
+  const opts = document.querySelectorAll('.opt');
+  const correct = selected === q.answer;
+
+  opts.forEach((el, i) => {
+    el.classList.add('disabled');
+    if (i === q.answer) el.classList.add('correct');
+    else if (i === selected && !correct) el.classList.add('wrong');
+    el.classList.remove('selected');
+  });
+
+  if (correct) score++;
+
+  answers.push({
+    q: q.text,
+    category: q.category,
+    selected,
+    correct: q.answer,
+    isCorrect: correct,
+    selectedText: q.options[selected],
+    correctText: q.options[q.answer],
+    explanation: q.explanation
+  });
+
+  const expEl = document.getElementById('explanation');
+  expEl.innerHTML = q.explanation;
+  expEl.style.display = 'block';
+  expEl.classList.add('show');
+
+  document.getElementById('btn-submit').style.display = 'none';
+  document.getElementById('btn-next').style.display = 'inline-flex';
+  document.getElementById('score-live').textContent = `Score: ${score}`;
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResults() {
+  document.getElementById('quiz-area').style.display = 'none';
+  const ss = document.getElementById('score-screen');
+  ss.style.display = 'block';
+
+  const pct = score / questions.length;
+  document.getElementById('score-num').textContent = score;
+
+  const deg = Math.round(pct * 360);
+  document.getElementById('score-ring').style.setProperty('--pct', deg + 'deg');
+}
+
+function toggleReview() {
+  const list = document.getElementById('review-list');
+  const btn  = event.target;
+  if (list.style.display === 'none') {
+    list.style.display = 'flex';
+    btn.textContent = 'Hide Review';
+    renderReview();
+  } else {
+    list.style.display = 'none';
+    btn.textContent = 'Review Answers';
+  }
+}
+
+function renderReview() {
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+  answers.forEach((a, i) => {
+    const div = document.createElement('div');
+    div.className = 'review-item ' + (a.isCorrect ? 'r-correct' : 'r-wrong');
+    div.innerHTML = `
+      <div class="review-qtext">Q${i+1}. ${a.q.substring(0, 120)}${a.q.length > 120 ? '…' : ''}</div>
+      <div class="review-ans">
+        ${a.isCorrect
+          ? `<span class="correct-ans">✓ Correct: ${a.correctText.substring(0,80)}${a.correctText.length>80?'…':''}</span>`
+          : `<span class="your-ans">✗ Your answer: ${a.selectedText.substring(0,70)}${a.selectedText.length>70?'…':''}</span><br>
+             <span class="correct-ans">✓ Correct: ${a.correctText.substring(0,70)}${a.correctText.length>70?'…':''}</span>`
+        }
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function restartQuiz() {
+  current = 0; selected = null; submitted = false; score = 0; answers = [];
+  document.getElementById('score-screen').style.display = 'none';
+  document.getElementById('quiz-area').style.display   = 'block';
+  renderQuestion();
+}
+
+// Init
+renderQuestion();
+</script>
+</body>
+</html>
